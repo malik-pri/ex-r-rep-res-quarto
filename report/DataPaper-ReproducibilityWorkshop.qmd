@@ -1,5 +1,5 @@
 ---
-title: "Data Article: Trier social stress test and food-choice: Behavioral, self-report & hormonal data(data fluency chnage)"
+title: "Data Article: Trier social stress test and food-choice: Behavioral, self-report & hormonal data(data fluency change)"
 author: "Felix Jan Nitsch; Manuela Sellitto; Tobias Kalenscher"
 format: html
 editor: visual
