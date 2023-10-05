@@ -6,9 +6,15 @@ editor: visual
 bibliography: references.bib
 ---
 
-Citation to original version of this data article:
+*Citation to original version of this data article:*
 
-Nitsch, F. J., Sellitto, M., & Kalenscher, T. (2021). Trier social stress test and food-choice: Behavioral, self-report & hormonal data. Data in brief (**Example 1**), *37*, 107245. https://doi.org/10.1016/j.dib.2021.107245 (**Example 2**)
+Nitsch, F. J., Sellitto, M., & Kalenscher, T. (2021). Trier social stress test and food-choice: Behavioral, self-report & hormonal data. *Data in brief* (**Example 1**), *37*, 107245. <https://doi.org/10.1016/j.dib.2021.107245> (**Example 2**)
+
+| Col1        | Col2 | Col3 |
+|-------------|-----:|------|
+| hello there |    2 |      |
+| world       |    3 |      |
+|             |      |      |
 
 **Abstract**
 
@@ -16,13 +22,13 @@ A sample of 144 participants underwent the Trier Social Stress Test (TSST), a ps
 
 **Keywords:** Acute stress; Amylase Choice Consistency; Cortisol; Chronic StressFood-Choice; Rationality.
 
-**1. Value of the Data** (**Example 3**)
+## **1. Value of the Data** (**Example 3**)
 
 (**Example 4**)
 
-The data are useful, as both the analysis of salivary cortisol for a relatively large sample as well as the implementation of an incentive-compatible behavioral task are expensive. Further, data sharing in the field of choice consistency/rationality is still relatively uncommon, making the aggregation of evidence challenging [@nitsch2020b].
+-   The data are useful, as both the analysis of salivary cortisol for a relatively large sample as well as the implementation of an incentive-compatible behavioral task are expensive. Further, data sharing in the field of choice consistency/rationality is still relatively uncommon, making the aggregation of evidence challenging [@nitsch2020b].
 
-The data is valuable to researchers interested in the interplay of physiological and subjective stress. It enables exploratory data-analysis regarding individual differences in stress reactivity and mediators of the stress response.
+-   The data is valuable to researchers interested in the interplay of physiological and subjective stress. It enables exploratory data-analysis regarding individual differences in stress reactivity and mediators of the stress response.
 
 ## **2. Data Description**
 
@@ -64,17 +70,95 @@ The dataset contains data of 144 participants. Participants did not have formal 
 
 (**Example 5**)
 
-\[Fig. 1 provides an exact overview of the experimental timeline for each measure we collected. All experimental sessions took place from 3 p.m. to 6 p.m. to control for circadian variations of hormonal levels. Participants were assigned to the two experimental conditions pseudo-randomly.\]
+![Timeline of the experiment](fig/Fig1.jpg){#fig-timeline fig-align="center"}
 
-Our food-choice task was administered following a 2 × 3 mixed-factorial design with Experimental Group (stress vs. control) as between-subject factor and Measurement (Baseline, Early, Late) as within-subject factor. We deployed a standard food-choice task similar to the one used by @harbaugh2001 and @chung2017. In each trial, participants chose one out of a set of two to seven snack bundles. Each snack bundle consisted of specific amounts of a sweet or salty snack and a fruit or vegetable. The choice set was defined by all integer combinations of sweet or salty snack and fruit or vegetable on the budget-line. The budget-line was given by the following formula:
+@fig-timeline provides an exact overview of the experimental timeline for each measure we collected. All experimental sessions took place from 3 p.m. to 6 p.m. to control for circadian variations of hormonal levels. Participants were assigned to the two experimental conditions pseudo-randomly.
+
+Our food-choice task was administered following a 2 × 3 mixed-factorial design with Experimental Group (stress vs. control) as between-subject factor and Measurement (Baseline, Early, Late) as within-subject factor. We deployed a standard food-choice task similar to the one used by @harbaugh2001 and @chung2017. In each trial, participants chose one out of a set of two to seven snack bundles. Each snack bundle consisted of specific amounts of a sweet or salty snack and a fruit or vegetable. The choice set was defined by all integer combinations of sweet or salty snack and fruit or vegetable on the budget-line. The budget-line was given by the following formula @eq-budget:
 
 (**Example 6**) Amount (fruit/vegetable) = - px/py Amount (sweet/salty) + m/py
 
+$$
+\text Amount (fruit/vegetable) = - \frac{px}{py}  
+Amount (\frac{sweet}{salty}) + \frac{m}{py}
+$$ {#eq-budget}
+
+::: callout-tip
 At the end of the experiment, one trial was randomly selected for each participant, and their choice in that trial was implemented, i.e., participants received their chosen snack bundle. The experimental task was presented via PsychoPy @peirce2007. For 8 participants (out of N = 144 participants), no or incomplete food-choice data were saved due to a technical failure of the experimental hardware.
+:::
+
+Here's some <b>bold</b> test. \# HTML Code
 
 ## **4. Preview of Research Results**
 
 (**Example 8**) add Fig 3 - Heart Rate Analysis
+
+The heart rate analysis is shown in @fig-heartrate
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+#| fig-width: 6
+#| fig-cap: "Heart Rate Analysis"
+#| label: "fig-heartrate"
+
+library(tidyverse)
+library(BayesFactor)
+
+#Read data
+#df <- read_csv("../output/data/preprocessed-GARP-TSST-data.csv")
+#df <- read_csv(here::here("output/data/preprocessed-GARP-TSST-data.csv")) # for rmarkdown solution
+
+df <- read_csv("output/data/preprocessed-GARP-TSST-data.csv")
+
+#Convert df to long-format
+df_long <- df %>%
+  pivot_longer(cols = c(HR_Baseline_Average, HR_TSST_Average),
+               names_to = "Measurement",
+               values_to = "HR")
+
+#Drop missing values
+df_long <- df_long %>% drop_na(HR)
+
+#Make sure columns are coded as factors for analysis
+df_long$VPN <- as.factor(df_long$VPN)
+df_long$Measurement <- as.factor(df_long$Measurement)
+df_long$Condition <- as.factor(df_long$Condition)
+
+# #Bayesian Analysis
+# BF <- anovaBF(formula = HR ~ Measurement*Condition + VPN,
+#               data = df_long,
+#               whichRandom = "VPN")
+# 
+# #Evidence for interaction term
+# BF_interaction <- BF[4]/BF[3]
+# 
+# BF_interaction
+
+#Summarize to mean / SEM for plot
+df_long2 <- df_long %>%
+  group_by(Measurement, Condition) %>%
+  summarize(mean_value = mean(HR, na.rm = T),
+            sem = sd(HR, na.rm = T)/sqrt(n()))
+
+#Create plot
+plot <- ggplot(df_long2, aes(Measurement, mean_value, group = Condition, color = Condition)) +
+  geom_pointrange(aes(ymin=mean_value-sem, ymax= mean_value+sem)) +
+  geom_line() +
+  theme_classic() +
+  scale_x_discrete(labels = c("Baseline",
+                              "TSST-G/Control")) +
+  ylab("Mean Heartrate (BPM)") +
+  scale_colour_grey(start = 0.5, end = 0.2) +
+  theme(legend.position = "top")
+
+#Print and save plots  
+plot
+
+#ggsave("output/plots/heartrate.pdf", plot, width = 4, height = 3)
+
+```
 
 (**Example 9**) add Fig 4: Cortisol and Amylase Levels in Stress and Control Groups
 
